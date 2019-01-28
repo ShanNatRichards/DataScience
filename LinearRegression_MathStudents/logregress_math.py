@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 from scipy.stats import normaltest
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 
 #datset from kaggle, found here https://www.kaggle.com/janiobachmann/math-students
@@ -36,9 +36,9 @@ data['G3'].skew()
 #Let's check with D'Agostino's K^2 test
 stat, p = normaltest(data['D3'])
 
-##indicates p <.05, so not a normally distributed.
-##we will keep that in mind when applying regression
-
+##indicates p <.05, so not a normally distributed dataset,
+###but what we really care about is ifthe residuals have normal distribution which is still
+#possible even if our target variable is non-normal.
 
 ##Let's clean up some of the data columns, code the categorical variables
 
@@ -70,7 +70,6 @@ data.info()
 
 corr_sig = []
 for j in data.columns:
-
     val, p = pearsonr(data.G3, data.loc[:,j])
     if (p < 0.05):
             temp = [j, val, p]
@@ -117,24 +116,38 @@ drop_cols()
 data.head()
 ##works well!
 
-##Let's do a linear regression
-Y = data.G3
-X = data.iloc[:, :-1]
+##Let's do a logisitic regression
+data['Final'] = data.G3
+def collapse(val):
+    if val <= 10:
+        return 1
+    elif val <=15:
+        return 2
+    else:
+        return 3
 
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+data.Final = data.Final.apply(collapse)
 
-model = LinearRegression()
+
+y = data.Final
+X = data.iloc[:, :-2]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LogisticRegression(solver='newton-cg', multi_class = 'ovr') #only newton cg seems to work, others did not converge
+##need to do some feature scaling for G1 and G2 most likelyself.
 model.fit(X_train, y_train)
-model.coef_
-model.intercept_
 pred_y = model.predict(X_test)
 df = pd.DataFrame({'Predicted': pred_y, 'Actual': y_test})
+model.score(X, y);
 
-mse= metrics.mean_squared_error(y_test, pred_y)
+##accuracy as 90% when run.
+
+''''mse= metrics.mean_squared_error(y_test, pred_y)
 mae= metrics.mean_absolute_error(y_test, pred_y)
 rmse = np.sqrt(mse)
 accuracy = metrics.r2_score(y_test, pred_y)
-print("The MSE is", mse, "\nThe MAE is", mae, "\nThe RSME is", rmse, "\nThe accuracy is", accuracy)
+print("The MSE is", mse, "\nThe MAE is", mae, "\nThe RSME is", rmse, "\nThe accuracy is", accuracy)''''
 
 #The accuracy is about 74% when I ran, which could be a lot better but performs well overall
 #As I do more regressions, hopefully I can boost the outcome of this
