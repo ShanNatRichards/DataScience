@@ -1,3 +1,6 @@
+# Use Selenium driver to scrape the webpage for each professor's specific url 
+# and then Beautiful soup to parse the html
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
@@ -40,7 +43,7 @@ urls = []
 names = []
 grades = []
 
-#grab the containers with professors name and urls for the professors specific pages
+#use regex grab the containers with professors name and urls for the professors specific pages
 for prof in soup.find_all('li', id = re.compile('^my-professor-')):
     rating = prof.find('span', class_ = 'rating').text
     if rating != 'N/A':
@@ -133,6 +136,6 @@ for each in tagratings:
 data = pd.DataFrame({"Name": names, "Grade": grades, "Caring" : care, "Funny" : hil,
                       "Respect":res, "Inspire": inspo, "Access": access, "Department": dept})
 
-pickle.dump(data, open("MyPersonalProject/UBCO_data.p", 'wb'))
+pickle.dump(data, open("datasets/UBCO_data.p", 'wb'))
 
 ######

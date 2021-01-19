@@ -5,13 +5,15 @@ import numpy as np
 from matplotlib import style
 
 
-file = pickle.load(open("MyPersonalProject/SFU_Data.p", 'rb'))
-file2 = pickle.load(open("MyPersonalProject/OC_Data.p", 'rb'))
-file3 = pickle.load(open("MyPersonalProject/UBCO_Data.p", 'rb'))
+#De-pickle our stores data and load
+file = pickle.load(open("datasets/SFU_Data.p", 'rb'))
+file2 = pickle.load(open("datasets/OC_Data.p", 'rb'))
+file3 = pickle.load(open("datasets/UBCO_data.p", 'rb'))
 
 sfu = pd.DataFrame(file)
 oc = pd.DataFrame(file2)
 ubc = pd.DataFrame(file3)
+
 print(sfu.head(20))
 print(sfu.info())
 print(sfu.describe())
@@ -139,6 +141,9 @@ sfu_top5 = all_grouped.iloc[:,1].sort_values(ascending = False).head(5)
 print(sfu_top5)
 ubc_top5 = all_grouped.iloc[:,2].sort_values(ascending = False).head(5)
 print(sfu_top5)
+
+
+#Using seaborn
 
 sns.set_style('darkgrid')
 plt.figure(figsize =(16,8))
