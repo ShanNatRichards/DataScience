@@ -1,3 +1,6 @@
+#Goal:  Perform a multinomial logistic regression on a grades data set#
+#datset from kaggle, found here https://www.kaggle.com/janiobachmann/math-students
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,7 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 
-#datset from kaggle, found here https://www.kaggle.com/janiobachmann/math-students
+
 
 data = pd.read_csv('kaggle_datasets/student-mat.csv')
 data.info()
@@ -20,7 +23,8 @@ data.isnull().sum()
 #We're interested in variable G3, is the final grade
 data['G3'].describe()
 np.median(data['G3'])
-#The grade it seems is out of 20
+
+#The final grade it seems is out of 20
 #Let's visualize:
 y = data.G3
 plt.title("Students Final Grades")
@@ -37,7 +41,7 @@ data['G3'].skew()
 stat, p = normaltest(data['D3'])
 
 ##indicates p <.05, so not a normally distributed dataset,
-###but what we really care about is ifthe residuals have normal distribution which is still
+###but what we really care about is if the residuals have normal distribution which is still
 #possible even if our target variable is non-normal.
 
 ##Let's clean up some of the data columns, code the categorical variables
@@ -63,7 +67,6 @@ data = data.replace({"sex": {"F": 1, "M": 2},
 
 data.info()
 #Looks like all the columns have converted from string to integer
-
 #Great let's find the correlations with our target variable G3, especially those columns that show significance
 #Unfortunately, pandas soesn't seem to have a function that returns correlations and p-values
 #so this little for loop had to do the trick
@@ -76,7 +79,7 @@ for j in data.columns:
             corr_sig.append(temp)
 
 
-##now let's sort the corr_sig
+#now let's sort the corr_sig
 
 def getkey(group):
     return group[1]
@@ -116,8 +119,9 @@ drop_cols()
 data.head()
 ##works well!
 
-##Let's do a logisitic regression
+##Let's do a logistic regression
 data['Final'] = data.G3
+
 def collapse(val):
     if val <= 10:
         return 1
@@ -134,14 +138,17 @@ X = data.iloc[:, :-2]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-model = LogisticRegression(solver='newton-cg', multi_class = 'ovr') #only newton cg seems to work, others did not converge
-##need to do some feature scaling for G1 and G2 most likelyself.
+model = LogisticRegression(solver='newton-cg', multi_class = 'ovr') 
+
+#only newton cg seems to work, others did not converge
+#need to do some feature scaling for G1 and G2 most likely.
+
 model.fit(X_train, y_train)
 pred_y = model.predict(X_test)
 df = pd.DataFrame({'Predicted': pred_y, 'Actual': y_test})
 model.score(X, y);
 
-##accuracy as 90% when run.
+
 
 ''''mse= metrics.mean_squared_error(y_test, pred_y)
 mae= metrics.mean_absolute_error(y_test, pred_y)
@@ -150,4 +157,4 @@ accuracy = metrics.r2_score(y_test, pred_y)
 print("The MSE is", mse, "\nThe MAE is", mae, "\nThe RSME is", rmse, "\nThe accuracy is", accuracy)''''
 
 #The accuracy is about 74% when I ran, which could be a lot better but performs well overall
-#As I do more regressions, hopefully I can boost the outcome of this
+
